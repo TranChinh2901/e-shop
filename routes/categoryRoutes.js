@@ -1,5 +1,5 @@
 const express = require('express'); // Import express
-const {createCategoryController, updateCategoryController, categoryController, singleCategoryController, deleteCategoryController} = require("../controllers/categoryController");
+const { createCategoryController, updateCategoryController, categoryController, singleCategoryController, deleteCategoryController } = require("../controllers/categoryController");
 const { requireSignIn, isAdmin } = require("../middlewares/authMiddleware");
 
 const router = express.Router(); // Tạo instance của express.Router()

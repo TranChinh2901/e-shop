@@ -5,29 +5,29 @@ const JWT = require("jsonwebtoken")
 //****************************************REGISTER********************************************* */
 const registerController = async (req, res) => {
     try {
-        const {name, email, password, phone, address, answer} = req.body;
-        if(!name){
-            return res.send({error: 'Name is required'})
+        const { name, email, password, phone, address, answer } = req.body;
+        if (!name) {
+            return res.send({ error: 'Name is required' })
         };
-        if(!email){
-            return res.send({message: 'Email is required'})
+        if (!email) {
+            return res.send({ message: 'Email is required' })
         }
-        if(!password){
-            return res.send({message: 'Password is required'})
+        if (!password) {
+            return res.send({ message: 'Password is required' })
         }
-        if(!phone){
-            return res.send({message: 'Phone is required'})
+        if (!phone) {
+            return res.send({ message: 'Phone is required' })
         }
-        if(!address){
-            return res.send({message: 'Address is required'})
+        if (!address) {
+            return res.send({ message: 'Address is required' })
         }
-        if(!answer){
-            return res.send({message: 'answer is required'})
+        if (!answer) {
+            return res.send({ message: 'answer is required' })
         }
         //find user
-        const exisitingUser = await userModel.findOne({email})
-        
-        if(exisitingUser){
+        const exisitingUser = await userModel.findOne({ email })
+
+        if (exisitingUser) {
             return res.status(200).send({
                 success: false,
                 message: 'Already register please login'
@@ -37,17 +37,17 @@ const registerController = async (req, res) => {
         const hashedPassword = await hashPassword(password);
 
         const user = await new userModel({
-            name, 
-            email, 
-            phone, 
-            address, 
+            name,
+            email,
+            phone,
+            address,
             password: hashedPassword,
             answer
         }).save()
 
         res.status(201).send({
-            success:true,
-            message:'User register successfully',
+            success: true,
+            message: 'User register successfully',
             user,
         });
     } catch (error) {
@@ -57,7 +57,7 @@ const registerController = async (req, res) => {
             message: 'Error in registering',
             error
         });
-        
+
     }
 }
 
@@ -65,22 +65,22 @@ const registerController = async (req, res) => {
 
 const loginController = async (req, res) => {
     try {
-        const {email,password} = req.body
-        if(!email || !password) {
+        const { email, password } = req.body
+        if (!email || !password) {
             return res.status(404).send({
                 success: false,
-                message: 'Invalid email or password',   
+                message: 'Invalid email or password',
             })
         }
-        const user = await userModel.findOne({email})
-        if(!user){
+        const user = await userModel.findOne({ email })
+        if (!user) {
             return res.status(404).send({
                 success: false,
                 message: 'Email is not registerd'
             })
         }
         const match = await comparePassword(password, user.password)
-        if(!match){
+        if (!match) {
             return res.status(200).send({
                 success: false,
                 message: 'Invalid password'
@@ -88,8 +88,8 @@ const loginController = async (req, res) => {
         }
 
         //token
-        const token = await JWT.sign({_id: user._id}, process.env.JWT_SECRET, {expiresIn:"7d"}
-    );
+        const token = await JWT.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" }
+        );
 
         res.status(200).send({
             success: true,
@@ -109,50 +109,51 @@ const loginController = async (req, res) => {
         console.log(error);
         res.status(500).send({
             success: false,
-            message:'error in login',
+            message: 'error in login',
             error,
         });
     }
 }
 
 
-const forgotPasswordController = async (req,res) => {
-try {
-    const {email, answer, newPassword} = req.body
-    if(!email) {
-        res.status(400).send({message: 'email is required'})
-    }
-    if(!answer) {
-        res.status(400).send({message: 'answer is required'})
-    }
-    if(!newPassword) {
-        res.status(400).send({message: 'newPassword is required'})
-    }
+//***************************forgot password ******************************** */
+const forgotPasswordController = async (req, res) => {
+    try {
+        const { email, answer, newPassword } = req.body
+        if (!email) {
+            res.status(400).send({ message: 'email is required' })
+        }
+        if (!answer) {
+            res.status(400).send({ message: 'answer is required' })
+        }
+        if (!newPassword) {
+            res.status(400).send({ message: 'newPassword is required' })
+        }
 
-    //check
-    const user = await userModel.findOne({email, answers})
+        //check
+        const user = await userModel.findOne({ email, answers })
 
-    if(!user){
-        return res.status(404).send({
-            success: false,
-            message: 'wrong email or answers'
+        if (!user) {
+            return res.status(404).send({
+                success: false,
+                message: 'wrong email or answers'
+            })
+        }
+        const hashed = await hashPassword(newPassword)
+        await userModel.findByIdAndUpdate(user._id, { password: hashed })
+        res.status(200).send({
+            success: true,
+            message: 'Password reset successfully'
         })
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            message: 'Something went wrong',
+            error
+        })
+
     }
-    const hashed = await hashPassword(newPassword)
-    await userModel.findByIdAndUpdate(user._id,{password:hashed})
-    res.status(200).send({
-        success:true,
-        message: 'Password reset successfully' 
-    })
-} catch (error) {
-    console.log(error);
-    res.status(500).send({
-        success: false,
-        message: 'Something went wrong',
-        error
-    })
-    
-}
 }
 
 
@@ -165,8 +166,47 @@ const testController = (req, res) => {
         res.send('testController')
     } catch (error) {
         console.log(error);
-    res.send({ error });
+        res.send({ error });
     }
-    
+
 }
-module.exports = {registerController, loginController, testController, forgotPasswordController}
+
+
+
+
+const updateProfileController = async (req, res) => {
+    try {
+        const { name, email, password, address, phone } = req.body;
+        const user = await userModel.findById(req.user._id);
+        //password
+        if (password && password.length < 6) {
+            return res.json({ error: "Password must be 6 characters long" });
+        }
+        const hashedPassword = password ? await hashPassword(password) : undefined;
+        const updatedUser = await userModel.findByIdAndUpdate(
+            req.user._id,
+            {
+                name: name || user.name,
+                password: hashedPassword || user.password,
+                phone: phone || user.phone,
+                address: address || user.address,
+            },
+            { new: true }
+        );
+        res.status(200).send({
+            success: true,
+            message: "Profile Updated SUccessfully",
+            updatedUser,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(400).send({
+            success: false,
+            message: "Error WHile Update profile",
+            error,
+        });
+    }
+};
+
+
+module.exports = { registerController, loginController, testController, forgotPasswordController, updateProfileController }

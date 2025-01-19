@@ -1,6 +1,6 @@
 const express = require('express')
 const morgan = require('morgan')
-const authRoutes = require('./routes/authRoute.js') 
+const authRoutes = require('./routes/authRoute.js')
 const categoryRoutes = require('./routes/categoryRoutes.js')
 const productRoutes = require('./routes/productRoutes.js')
 const connectDB = require('./config/db')
@@ -25,13 +25,13 @@ app.use('/api/v1/category', categoryRoutes)
 app.use('/api/v1/product', productRoutes);
 
 //rest API
-app.get('/', (req, res)=>{
+app.get('/', (req, res) => {
     res.send('hello cac ban')
 })
 
 
 
-app.listen(port, localhost,()=>{
+app.listen(port, localhost, () => {
     console.log(`Server started at http://${localhost}:${port}`);
-    
+
 })
